@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dakota RP — Играй в GTA San Andreas по сети</title>
+  <!-- Шрифт Montserrat как на Arizona RP -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Иконки FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0a0a0c;
+      --bg-card: #131317;
+      --bg-card-hover: #1a1a20;
+      --accent-orange: #ff6b00;
+      --accent-orange-light: #ff9100;
+      --accent-glow: rgba(255, 107, 0, 0.45);
+      --text-main: #ffffff;
+      --text-muted: #9a9aa6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(255, 107, 0, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 70%, rgba(255, 145, 0, 0.07) 0%, transparent 40%);
+    }
+
+    /* Анимация появления при скролле */
+    .reveal {
+      opacity: 0;
+      transform: translateY(35px);
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Шапка сайта */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 18px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      background: rgba(10, 10, 12, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 107, 0, 0.15);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-light));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 22px;
+      color: #fff;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .logo-text span {
+      color: var(--accent-orange);
+    }
+
+    nav {
+      display: flex;
+      gap: 32px;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: var(--accent-orange);
+    }
+
+    .btn-header {
+      background: rgba(255, 107, 0, 0.15);
+      border: 1px solid var(--accent-orange);
+      color: var(--accent-orange);
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-header:hover {
+      background: var(--accent-orange);
+      color: #fff;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* Главный экран (Hero) */
+    .hero {
+      min-height: 100vh;
+      padding: 130px 8% 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 50px;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 620px;
+      z-index: 2;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 107, 0, 0.12);
+      border: 1px solid rgba(255, 107, 0, 0.35);
+      color: var(--accent-orange-light);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-orange);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.6); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 62px);
+      font-weight: 900;
+      line-height: 1.1;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-light));
+      color: #fff;
+      padding: 18px 36px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 15px;
+      text-transform: uppercase;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px var(--accent-glow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(255, 107, 0, 0.65);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 18px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-orange);
+      background: var(--bg-card-hover);
+    }
+
+    /* Правая карточка с мониторингом как на Arizona */
+    .hero-visual {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-16px); }
+    }
+
+    .server-card {
+      background: linear-gradient(145deg, #16161c, #0f0f13);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 107, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .server-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200px;
+      height: 200px;
+      background: var(--accent-orange);
+      filter: blur(90px);
+      opacity: 0.35;
+    }
+
+    .server-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .server-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .server-status {
+      background: rgba(46, 213, 115, 0.15);
+      color: #2ed573;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .online-bar-wrap {
+      margin-bottom: 24px;
+    }
+
+    .online-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .online-info span {
+      color: var(--accent-orange-light);
+      font-weight: 800;
+    }
+
+    .progress-bg {
+      width: 100%;
+      height: 10px;
+      background: #22222a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 78%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-orange-light));
+      border-radius: 10px;
+      box-shadow: 0 0 15px var(--accent-orange);
+    }
+
+    .ip-box {
+      background: #0a0a0d;
+      border: 1px dashed rgba(255, 107, 0, 0.4);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .ip-box:hover {
+      border-color: var(--accent-orange);
+      background: rgba(255, 107, 0, 0.06);
+    }
+
+    .ip-text {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .copy-badge {
+      color: var(--accent-orange);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Секция "Как начать играть" */
+    .section {
+      padding: 90px 8%;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 55px;
+    }
+
+    .section-title h2 {
+      font-size: 36px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 span {
+      color: var(--accent-orange);
+    }
+
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 34px;
+      position: relative;
+      transition: all 0.4s ease;
+      overflow: hidden;
+    }
+
+    .step-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--accent-orange);
+      box-shadow: 0 15px 35px rgba(255, 107, 0, 0.15);
+    }
+
+    .step-num {
+      font-size: 56px;
+      font-weight: 900;
+      color: rgba(255, 107, 0, 0.12);
+      position: absolute;
+      top: 15px;
+      right: 24px;
+      line-height: 1;
+    }
+
+    .step-icon {
+      width: 54px;
+      height: 54px;
+      background: rgba(255, 107, 0, 0.15);
+      color: var(--accent-orange);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 22px;
+    }
+
+    .step-card h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Секция особенностей */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-box {
+      background: linear-gradient(180deg, #15151a 0%, #0f0f13 100%);
+      border: 1px solid rgba(255, 107, 0, 0.15);
+      border-radius: 18px;
+      padding: 28px;
+      transition: 0.3s;
+    }
+
+    .feature-box:hover {
+      border-color: var(--accent-orange);
+      transform: scale(1.02);
+    }
+
+    .feature-box i {
+      font-size: 28px;
+      color: var(--accent-orange);
+      margin-bottom: 16px;
+    }
+
+    .feature-box h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-box p {
+      color: var(--text-muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    /* БЛОК СОЦСЕТЕЙ КАК НА ТВОЁМ ФОТО (БЕЗ ВК И ЮТУБА) */
+    .socials-wrapper {
+      padding: 40px 8% 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .socials-dock {
+      background: #141416;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 26px;
+      padding: 26px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 54px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+      flex-wrap: wrap;
+    }
+
+    .social-circle-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .circle-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: #ffffff;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+    }
+
+    .social-circle-item:hover .circle-btn {
+      transform: translateY(-6px) scale(1.08);
+    }
+
+    /* Telegram (голубой как на фото) */
+    .circle-tg {
+      background: #2aabee;
+      box-shadow: 0 0 26px rgba(42, 171, 238, 0.45);
+    }
+    .social-circle-item:hover .circle-tg {
+      box-shadow: 0 0 38px rgba(42, 171, 238, 0.8);
+    }
+
+    /* Discord (фиолетовый как на фото) */
+    .circle-ds {
+      background: #5865f2;
+      box-shadow: 0 0 26px rgba(88, 101, 242, 0.45);
+    }
+    .social-circle-item:hover .circle-ds {
+      box-shadow: 0 0 38px rgba(88, 101, 242, 0.8);
+    }
+
+    /* TikTok (чёрный как на фото) */
+    .circle-tt {
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 22px rgba(0, 0, 0, 0.8);
+    }
+    .social-circle-item:hover .circle-tt {
+      box-shadow: 0 0 30px rgba(255, 107, 0, 0.4);
+      border-color: var(--accent-orange);
+    }
+
+    /* Бейджик "В разработке" */
+    .dev-pill {
+      position: absolute;
+      bottom: -10px;
+      background: #1d1d22;
+      border: 1px solid var(--accent-orange);
+      color: var(--accent-orange-light);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Всплывающее уведомление при клике на "В разработке" */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #18181d;
+      border: 1px solid var(--accent-orange);
+      color: #fff;
+      padding: 14px 26px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Подвал */
+    footer {
+      text-align: center;
+      padding: 28px 8%;
+      background: #060608;
+      color: #5c5c6b;
+      font-size: 13px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    /* Адаптив под телефоны */
+    @media (max-width: 900px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 120px;
+      }
+      .hero-buttons {
+        justify-content: center;
+      }
+      nav {
+        display: none;
+      }
+      .socials-dock {
+        padding: 22px 32px;
+        gap: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Шапка -->
+  <header>
+    <a href="#" class="logo">
+      <div class="logo-icon">D</div>
+      <div class="logo-text">Dakota <span>RP</span></div>
+    </a>
+    <nav>
+      <a href="#start">Как начать играть</a>
+      <a href="#features">О проекте</a>
+      <a href="#socials">Соцсети</a>
+    </nav>
+    <a href="https://t.me/+rGdQ8ui9egg1YWYy" target="_blank" class="btn-header">Наш Telegram</a>
+  </header>
+
+  <!-- Главный экран -->
+  <section class="hero">
+    <div class="hero-content reveal active">
+      <div class="badge">
+        <div class="badge-dot"></div>
+        Открытие уже скоро • Бонус новичкам
+      </div>
+      <h1>Твоя новая история на <span>Dakota RP</span></h1>
+      <p>
+        Погрузись в атмосферу реальной жизни: уникальные фракции, тюнинг авто, собственный бизнес, 
+        частые обновления и честная администрация. Начни свой путь с нуля и стань легендой штата!
+      </p>
+      <div class="hero-buttons">
+        <a href="#start" class="btn-primary">
+          <i class="fa-solid fa-play"></i> Начать играть
+        </a>
+        <a href="https://t.me/+rGdQ8ui9egg1YWYy" target="_blank" class="btn-secondary">
+          <i class="fa-brands fa-telegram" style="color: #ff6b00; font-size: 18px;"></i> Следить за новостями
+        </a>
+      </div>
+    </div>
+
+    <!-- Карточка сервера -->
+    <div class="hero-visual reveal active">
+      <div class="server-card">
+        <div class="server-header">
+          <div class="server-title">DAKOTA RP | SERVER #1</div>
+          <div class="server-status">● ONLINE</div>
+        </div>
+        <div class="online-bar-wrap">
+          <div class="online-info">
+            <div>Игроков в сети</div>
+            <span>784 / 1000</span>
+          </div>
+          <div class="progress-bg">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+        <div class="ip-box" onclick="copyIP()">
+          <div class="ip-text" id="server-ip">play.dakota-rp.ru:7777</div>
+          <div class="copy-badge" id="copy-status"><i class="fa-regular fa-copy"></i> Скопировать</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Как начать играть -->
+  <section class="section" id="start">
+    <div class="section-title reveal">
+      <h2>Как <span>начать играть</span></h2>
+      <p>Всего 3 простых шага отделяют тебя от игры на сервере Dakota RP</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <div class="step-icon"><i class="fa-solid fa-download"></i></div>
+        <h3>Скачай лаунчер</h3>
+        <p>Загрузи наш официальный лаунчер для ПК или Android. Все нужные файлы и моды установятся автоматически.</p>
+      </div>
+
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <div class="step-icon"><i class="fa-solid fa-user-pen"></i></div>
+        <h3>Придумай никнейм</h3>
+        <p>Впиши свой игровой ник в формате Имя_Фамилия (например, Alex_Dakota) в настройках лаунчера.</p>
+      </div>
+
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <div class="step-icon"><i class="fa-solid fa-gamepad"></i></div>
+        <h3>Заходи на сервер</h3>
+        <p>Выбери первый сервер Dakota RP, нажми кнопку «Играть» и получи стартовый бонус при регистрации!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Особенности проекта -->
+  <section class="section" id="features">
+    <div class="section-title reveal">
+      <h2>Почему выбирают <span>Dakota RP</span></h2>
+      <p>Продуманный геймплей и высокий FPS даже на слабых устройствах</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-box reveal">
+        <i class="fa-solid fa-car-side"></i>
+        <h4>Реальный автопарк</h4>
+        <p>Сотни детализированных автомобилей с кастомным тюнингом, винилами и реалистичной физикой.</p>
+      </div>
+
+      <div class="feature-box reveal">
+        <i class="fa-solid fa-briefcase"></i>
+        <h4>Свой бизнес и семьи</h4>
+        <p>Покупай АЗС, магазины, создавай свою семью, захватывай территории и развивай империю.</p>
+      </div>
+
+      <div class="feature-box reveal">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h4>Фракции и гос. структуры</h4>
+        <p>Стань полицейским, врачом, лидером мафии или уличной банды с уникальными квестами.</p>
+      </div>
+
+      <div class="feature-box reveal">
+        <i class="fa-solid fa-bolt"></i>
+        <h4>Частые обновления</h4>
+        <p>Каждую неделю добавляем новые системы, ивенты, промокоды и розыгрыши в нашем Telegram.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Блок соцсетей в конце сайта (как на фото, без ВК и Ютуба) -->
+  <section class="socials-wrapper reveal" id="socials">
+    <div class="socials-dock">
+      <!-- Telegram -->
+      <a href="https://t.me/+rGdQ8ui9egg1YWYy" target="_blank" class="social-circle-item" title="Наш Telegram канал">
+        <div class="circle-btn circle-tg">
+          <i class="fa-brands fa-telegram"></i>
+        </div>
+      </a>
+
+      <!-- Discord (в разработке) -->
+      <div class="social-circle-item" onclick="showDevToast('Discord сервер')">
+        <div class="circle-btn circle-ds">
+          <i class="fa-brands fa-discord"></i>
+        </div>
+        <span class="dev-pill">В разработке</span>
+      </div>
+
+      <!-- TikTok (в разработке) -->
+      <div class="social-circle-item" onclick="showDevToast('TikTok аккаунт')">
+        <div class="circle-btn circle-tt">
+          <i class="fa-brands fa-tiktok"></i>
+        </div>
+        <span class="dev-pill">В разработке</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Уведомление -->
+  <div class="toast" id="devToast"></div>
+
+  <!-- Подвал -->
+  <footer>
+    © 2026 Dakota RP. Все права защищены. Проект не связан с Rockstar Games или Take-Two Interactive.
+  </footer>
+
+  <!-- Скрипты -->
+  <script>
+    // Плавное появление при скролле
+    function revealOnScroll() {
+      const reveals = document.querySelectorAll('.reveal');
+      for (let i = 0; i < reveals.length; i++) {
+        const windowHeight = window.innerHeight;
+        const elementTop = reveals[i].getBoundingClientRect().top;
+        if (elementTop < windowHeight - 100) {
+          reveals[i].classList.add('active');
+        }
+      }
+    }
+    window.addEventListener('scroll', revealOnScroll);
+
+    // Копирование IP
+    function copyIP() {
+      const ipText = document.getElementById('server-ip').innerText;
+      navigator.clipboard.writeText(ipText).then(() => {
+        const status = document.getElementById('copy-status');
+        status.innerHTML = '<i class="fa-solid fa-check"></i> Скопировано!';
+        status.style.color = '#2ed573';
+        setTimeout(() => {
+          status.innerHTML = '<i class="fa-regular fa-copy"></i> Скопировать';
+          status.style.color = '#ff6b00';
+        }, 2500);
+      });
+    }
+
+    // Подсказка при клике на соцсети в разработке
+    let toastTimeout;
+    function showDevToast(name) {
+      const toast = document.getElementById('devToast');
+      toast.innerHTML = `<i class="fa-solid fa-wrench" style="color: #ff6b00; margin-right: 8px;"></i> ${name} Dakota RP сейчас в разработке!`;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
